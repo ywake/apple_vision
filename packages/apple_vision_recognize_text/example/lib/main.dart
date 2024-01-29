@@ -65,6 +65,8 @@ class _VisionRT extends State<VisionRT>{
             image: image!,
             imageSize: imageSize,
             recognitionLevel: RecognitionLevel.accurate,
+            locales: [const Locale('en-US')],
+            automaticallyDetectsLanguage: true,
           ).then((data){
             textData = data;
             setState(() {
