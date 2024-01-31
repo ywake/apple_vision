@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:apple_vision_commons/apple_vision_commons.dart';
 
+import 'dispatch_qos.dart';
+
 /// The [AppleVisionRecognizeTextController] holds all the logic of this plugin,
 /// where as the [AppleVisionObject] class is the frontend of this plugin.
 class AppleVisionRecognizeTextController {
@@ -25,7 +27,14 @@ class AppleVisionRecognizeTextController {
   /// [imageSize] as Size is the size of the image that is being processed
   /// 
   /// [orientation] The orientation of the image
-  Future<List<RecognizedText>?> processImage(Uint8List image, Size imageSize,[ImageOrientation orientation = ImageOrientation.down]) async{
+  /// 
+  /// [qos] Quality-of-service classes that specify the priorities for executing tasks.
+  Future<List<RecognizedText>?> processImage({
+    required Uint8List image,
+    required Size imageSize,
+    ImageOrientation orientation = ImageOrientation.down,
+    AppleVisionDispatchQoS qos = AppleVisionDispatchQoS.unspecified,
+  }) async{
     try {
       final data = await _methodChannel.invokeMapMethod<String, dynamic>(  
         'process',
@@ -33,7 +42,8 @@ class AppleVisionRecognizeTextController {
           'width': imageSize.width,
           'height':imageSize.height,
           'candidates': numberOfCandidates,
-          'orientation': orientation.name
+          'orientation': orientation.name,
+          'qos': qos.name,
           //'languages': languages
         },
       );

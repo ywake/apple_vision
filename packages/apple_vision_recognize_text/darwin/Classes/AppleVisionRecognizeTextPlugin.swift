@@ -41,21 +41,44 @@ public class AppleVisionRecognizeTextPlugin: NSObject, FlutterPlugin {
             let height = arguments["height"] as? Double ?? 0
             let candidates = arguments["candidates"] as? Int ?? 1
             let orientation = arguments["orientation"] as? String ?? "downMirrored"
+            let qosString = arguments["qos"] as? String ?? "unspecified"
+
+            var qos:DispatchQoS.QoSClass = .unspecified
+            switch qosString {
+                case "background":
+                    qos = .background
+                    break
+                case "utility":
+                    qos = .utility
+                    break
+                case "default":
+                    qos = .default
+                    break
+                case "userInitiated":
+                    qos = .userInitiated
+                    break
+                case "userInteractive":
+                    qos = .userInteractive
+                    break
+                default:
+                    qos = .unspecified
+                    break
+            }
 
             #if os(iOS)
                 if #available(iOS 13.0, *) {
-                      DispatchQueue.global(qos: .background).async {
-                    let event = self.convertImage(Data(data.data), CGSize(width: width , height: height), candidates, CIFormat.BGRA8, orientation)
-                    DispatchQueue.main.async {
-                        // Return the result on the main queue
-                        result(event)
+                    DispatchQueue.global(qos: qos).async {
+                        let event = self.convertImage(Data(data.data), CGSize(width: width , height: height), candidates, CIFormat.BGRA8, orientation)
+                        DispatchQueue.main.async {
+                            // Return the result on the main queue
+                            result(event)
+                        }
                     }
-                }
                 } else {
                     return result(FlutterError(code: "INVALID OS", message: "requires version 12.0", details: nil))
                 }
             #elseif os(macOS)
-                    DispatchQueue.global(qos: .background).async {
+                DispatchQueue.global(qos: qos).async {
                     let event = self.convertImage(Data(data.data), CGSize(width: width , height: height), candidates, CIFormat.BGRA8, orientation)
                     DispatchQueue.main.async {
                         // Return the result on the main queue

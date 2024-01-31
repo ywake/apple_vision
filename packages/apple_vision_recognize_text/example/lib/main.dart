@@ -61,7 +61,7 @@ class _VisionRT extends State<VisionRT>{
         }
         if(mounted) {
           Uint8List? image = i.bytes;
-          visionController.processImage(image!, imageSize).then((data){
+          visionController.processImage(image: image!, imageSize: imageSize).then((data){
             textData = data;
             setState(() {
               
