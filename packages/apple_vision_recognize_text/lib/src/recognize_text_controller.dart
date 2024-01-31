@@ -31,6 +31,8 @@ class AppleVisionRecognizeTextController {
   /// [locales] An array of locale to detect, in priority order.
   /// 
   /// [automaticallyDetectsLanguage] A Boolean value that indicates whether to attempt detecting the language to use the appropriate model for recognition and language correction. (Only available in iOS 16.0 or newer.)
+  /// 
+  /// [qos] Quality-of-service classes that specify the priorities for executing tasks.
   Future<List<RecognizedText>?> processImage({
     required Uint8List image,
     required Size imageSize,
@@ -38,6 +40,7 @@ class AppleVisionRecognizeTextController {
     RecognitionLevel recognitionLevel = RecognitionLevel.accurate,
     List<Locale>? locales,
     bool automaticallyDetectsLanguage = false,
+    AppleVisionDispatchQoS qos = AppleVisionDispatchQoS.unspecified,
   }) async{
     try {
       final data = await _methodChannel.invokeMapMethod<String, dynamic>(  
@@ -53,6 +56,7 @@ class AppleVisionRecognizeTextController {
               locale.toLanguageTag(),
           ],
           'automaticallyDetectsLanguage': automaticallyDetectsLanguage,
+          'qos': qos.name,
         },
       );
       return _convertData(data);

@@ -44,15 +44,50 @@ public class AppleVisionRecognizeTextPlugin: NSObject, FlutterPlugin {
             let recognitionLevel = arguments["recognitionLevel"] as? String ?? "accurate"
             let languages = arguments["languages"] as? [String] ?? nil
             let automaticallyDetectsLanguage = arguments["automaticallyDetectsLanguage"] as? Bool ?? false
+            let qosString = arguments["qos"] as? String ?? "unspecified"
+
+            var qos:DispatchQoS.QoSClass = .unspecified
+            switch qosString {
+                case "background":
+                    qos = .background
+                    break
+                case "utility":
+                    qos = .utility
+                    break
+                case "default":
+                    qos = .default
+                    break
+                case "userInitiated":
+                    qos = .userInitiated
+                    break
+                case "userInteractive":
+                    qos = .userInteractive
+                    break
+                default:
+                    qos = .unspecified
+                    break
+            }
 
             #if os(iOS)
                 if #available(iOS 13.0, *) {
-                    return result(convertImage(Data(data.data),CGSize(width: width , height: height),candidates,CIFormat.BGRA8,orientation,recognitionLevel,languages,automaticallyDetectsLanguage))
+                    DispatchQueue.global(qos: qos).async {
+                        let event = self.convertImage(Data(data.data), CGSize(width: width , height: height), candidates, CIFormat.BGRA8, orientation,recognitionLevel,languages,automaticallyDetectsLanguage)
+                        DispatchQueue.main.async {
+                            // Return the result on the main queue
+                            result(event)
+                        }
+                    }
                 } else {
                     return result(FlutterError(code: "INVALID OS", message: "requires version 12.0", details: nil))
                 }
             #elseif os(macOS)
-                return result(convertImage(Data(data.data),CGSize(width: width , height: height),candidates,CIFormat.ARGB8,orientation,recognitionLevel,languages,automaticallyDetectsLanguage))
+                DispatchQueue.global(qos: qos).async {
+                    let event = self.convertImage(Data(data.data), CGSize(width: width , height: height), candidates, CIFormat.BGRA8, orientation,recognitionLevel,languages,automaticallyDetectsLanguage)
+                    DispatchQueue.main.async {
+                        // Return the result on the main queue
+                        result(event)
+                    }
+                }
             #endif
         default:
             result(FlutterMethodNotImplemented)
